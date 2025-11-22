@@ -1,8 +1,5 @@
 package Connectia.model;
 
-
-
-
 public class Usuario {
 
     private int idUsuario;
