@@ -1,60 +1,89 @@
 package Connectia.resource;
 
-
-import Connectia.dao.CursosDao;
+import Connectia.bo.CursosBo;
 import Connectia.model.Cursos;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
+@Path("/cursos")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class CursosResource {
 
-    @Path("/cursos")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public class CursosResource {
+    @Inject
+    CursosBo bo;
 
-        @Inject
-        CursosDao dao;
-
-        @GET
-        public Response listar() {
-            return Response.ok(dao.listar()).build();
-        }
-
-        @GET
-        @Path("/{id}")
-        public Response buscarPorId(@PathParam("id") Long id) {
-            Cursos curso = dao.buscar(id);
-            if (curso == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-            return Response.ok(curso).build();
-        }
-
-        @POST
-        public Response cadastrar(Cursos curso) {
-            dao.cadastrar(curso);
-            return Response.status(Response.Status.CREATED).entity(curso).build();
-        }
-
-        @PUT
-        @Path("/{id}")
-        public Response atualizar(@PathParam("id") Long id, Cursos curso) {
-            curso.setId(id);
-            dao.atualizar(curso);
-            return Response.ok(curso).build();
-        }
-
-        @DELETE
-        @Path("/{id}")
-        public Response remover(@PathParam("id") Long id) {
-            dao.remover(id);
-            return Response.noContent().build();
+    // ================================
+    // LISTAR TODOS
+    // ================================
+    @GET
+    public Response listar() {
+        try {
+            List<Cursos> lista = bo.listar();
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
+    // ================================
+    // BUSCAR POR ID
+    // ================================
+    @GET
+    @Path("/{id}")
+    public Response buscarPorId(@PathParam("id") int id) {
+        try {
+            Cursos c = bo.buscarPorId(id);
+            return Response.ok(c).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+    }
 
+    // ================================
+    // CADASTRAR
+    // ================================
+    @POST
+    public Response salvar(Cursos c) {
+        try {
+            bo.salvar(c);
+            return Response.status(Response.Status.CREATED).entity("Curso cadastrado com sucesso!").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
+    // ================================
+    // ATUALIZAR
+    // ================================
+    @PUT
+    @Path("/{id}")
+    public Response atualizar(@PathParam("id") int id, Cursos c) {
+        try {
+            c.setIdCurso(id);
+            bo.atualizar(c);
+            return Response.ok("Curso atualizado com sucesso!").build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    // ================================
+    // EXCLUIR
+    // ================================
+    @DELETE
+    @Path("/{id}")
+    public Response excluir(@PathParam("id") int id) {
+        try {
+            bo.excluir(id);
+            return Response.ok("Curso excluído com sucesso!").build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+    }
 }
