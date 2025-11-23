@@ -20,6 +20,7 @@ public class CursoResource {
     // LISTAR TODOS
     // ================================
     @GET
+    @Path("/")
     public Response listar() {
         try {
             List<Curso> lista = bo.listar();
