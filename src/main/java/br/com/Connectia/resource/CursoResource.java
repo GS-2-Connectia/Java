@@ -8,7 +8,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
-@Path("/cursos")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CursoResource {
@@ -20,7 +20,7 @@ public class CursoResource {
     // LISTAR TODOS
     // ================================
     @GET
-    @Path("/")
+    @Path("/cursos")
     public Response listar() {
         try {
             List<Curso> lista = bo.listar();
