@@ -1,6 +1,7 @@
 package br.com.Connectia.dao;
 
 import br.com.Connectia.model.Curso;
+import br.com.Connectia.exception.CursoException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -15,14 +16,15 @@ public class CursoDao {
     @Inject
     DataSource dataSource;
 
-    // ================================
-    // LISTAR
-    // ================================
-    public List<Curso> listar() throws Exception {
-        List<Curso> lista = new ArrayList<>();
+    // ============================================================
+    // LISTAR TODOS OS CURSOS DISPONÍVEIS
+    // ============================================================
+    public List<Curso> listar() throws CursoException {
+        List<Curso> cursos = new ArrayList<>();
 
         String sql = """
-                SELECT id_curso, nm_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area
+                SELECT ID_CURSO, NM_CURSO, DS_CURSO, TP_CONTEUDO,
+                       DT_INICIO, STS_CURSO, ID_USUARIO, ID_AREA
                 FROM T_CON_CURSOS
                 """;
 
@@ -30,149 +32,81 @@ public class CursoDao {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                lista.add(criarObjeto(rs));
-            }
+            while (rs.next()) cursos.add(parseCurso(rs));
+
+        } catch (SQLException e) {
+            throw new CursoException("Erro ao listar cursos: " + e.getMessage());
         }
 
-        return lista;
+        return cursos;
     }
 
-    // ================================
-    // BUSCAR POR ID
-    // ================================
-    public Curso buscarPorId(int id) throws Exception {
+    // ============================================================
+    // BUSCAR CURSO POR ID  (Resource espera "buscar")
+    // ============================================================
+    public Curso buscar(int idCurso) throws CursoException {
         String sql = """
-                SELECT id_curso, nm_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area
-                FROM T_CON_CURSOS WHERE id_curso = ?
+                SELECT ID_CURSO, NM_CURSO, DS_CURSO, TP_CONTEUDO,
+                       DT_INICIO, STS_CURSO, ID_USUARIO, ID_AREA
+                FROM T_CON_CURSOS
+                WHERE ID_CURSO = ?
                 """;
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, id);
+            ps.setInt(1, idCurso);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return criarObjeto(rs);
-                }
+                if (rs.next()) return parseCurso(rs);
+                return null;
             }
-        }
 
-        return null;
+        } catch (SQLException e) {
+            throw new CursoException("Erro ao buscar curso: " + e.getMessage());
+        }
     }
 
-    // ================================
-    // SALVAR
-    // ================================
-    public void salvar(Curso c) throws Exception {
+    // ============================================================
+    // LISTAR CURSOS DO USUÁRIO (Resource espera "listarCursosDoUsuario")
+    // ============================================================
+    public List<Curso> listarCursosDoUsuario(int idUsuario) throws CursoException {
+        List<Curso> cursos = new ArrayList<>();
+
         String sql = """
-                INSERT INTO T_CON_CURSOS 
-                (nm_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                SELECT ID_CURSO, NM_CURSO, DS_CURSO, TP_CONTEUDO,
+                       DT_INICIO, STS_CURSO, ID_USUARIO, ID_AREA
+                FROM T_CON_CURSOS
+                WHERE ID_USUARIO = ?
                 """;
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            setarParametros(c, ps);
-            ps.executeUpdate();
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    c.setIdCurso(keys.getInt(1));
-                }
-            }
-        }
-    }
-
-    // ================================
-    // ATUALIZAR
-    // ================================
-    public void atualizar(Curso c) throws Exception {
-        String sql = """
-                UPDATE T_CON_CURSOS SET
-                    nm_curso = ?, 
-                    ds_curso = ?, 
-                    tp_conteudo = ?, 
-                    dt_inicio = ?, 
-                    sts_curso = ?, 
-                    id_usuario = ?, 
-                    id_area = ?
-                WHERE id_curso = ?
-                """;
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            setarParametros(c, ps);
-            ps.setInt(8, c.getIdCurso());
-            ps.executeUpdate();
-        }
-    }
-
-    // ================================
-    // EXCLUIR
-    // ================================
-    public boolean excluir(int id) throws Exception {
-        String sql = "DELETE FROM T_CON_CURSOS WHERE id_curso = ?";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        }
-    }
-
-
-    // ----------------------------------------------------------------------------------
-    //  INSCRIÇÃO DO USUÁRIO NO CURSO  (agora está correto)
-    // ----------------------------------------------------------------------------------
-
-    public boolean inscreverUsuarioNoCurso(int idUsuario, int idCurso) throws Exception {
-        String sql = """
-            UPDATE T_CON_CURSO_USUARIO 
-            SET ST_ATIVO = 'A', DT_INSCRICAO = SYSDATE
-            WHERE ID_USUARIO = ? AND ID_CURSO = ?
-            """;
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, idUsuario);
-            ps.setInt(2, idCurso);
 
-            int linhas = ps.executeUpdate();
-
-            if (linhas == 0) {
-                sql = """
-                        INSERT INTO T_CON_CURSO_USUARIO 
-                        (ID_USUARIO, ID_CURSO, ST_ATIVO, DT_INSCRICAO)
-                        VALUES (?, ?, 'A', SYSDATE)
-                      """;
-
-                try (PreparedStatement insert = conn.prepareStatement(sql)) {
-                    insert.setInt(1, idUsuario);
-                    insert.setInt(2, idCurso);
-                    return insert.executeUpdate() > 0;
-                }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) cursos.add(parseCurso(rs));
             }
 
-            return true;
+        } catch (SQLException e) {
+            throw new CursoException("Erro ao listar cursos do usuário: " + e.getMessage());
         }
+
+        return cursos;
     }
 
-
-    // ----------------------------------------------------------------------------------
-    //  CANCELAR INSCRIÇÃO
-    // ----------------------------------------------------------------------------------
-
-    public boolean cancelarInscricaoNoCurso(int idUsuario, int idCurso) throws Exception {
+    // ============================================================
+    // INSCREVER USUÁRIO (Resource espera "inscrever")
+    // ============================================================
+    public void inscrever(int idCurso, int idUsuario, int idArea) throws CursoException {
         String sql = """
-                UPDATE T_CON_CURSO_USUARIO 
-                SET ST_ATIVO = 'I'
-                WHERE ID_USUARIO = ? AND ID_CURSO = ?
+                UPDATE T_CON_CURSOS
+                SET ID_USUARIO = ?,
+                    STS_CURSO = 'N',
+                    DT_INICIO = SYSDATE
+                WHERE ID_CURSO = ?
+                AND ID_AREA = ?
                 """;
 
         try (Connection conn = dataSource.getConnection();
@@ -180,37 +114,89 @@ public class CursoDao {
 
             ps.setInt(1, idUsuario);
             ps.setInt(2, idCurso);
+            ps.setInt(3, idArea);
 
-            return ps.executeUpdate() > 0;
+            if (ps.executeUpdate() == 0) {
+                throw new CursoException("Falha ao inscrever: curso não encontrado.");
+            }
+
+        } catch (SQLException e) {
+            throw new CursoException("Erro ao inscrever usuário no curso: " + e.getMessage());
+        } catch (CursoException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    // ============================================================
+    // ATUALIZAR STATUS (N/E/C)
+    // ============================================================
+    public void atualizarStatus(int idCurso, int idArea, String novoStatus) throws CursoException {
+        String sql = """
+                UPDATE T_CON_CURSOS
+                SET STS_CURSO = ?
+                WHERE ID_CURSO = ?
+                AND ID_AREA = ?
+                """;
 
-    // ================================
-    // AUXILIARES
-    // ================================
-    private void setarParametros(Curso c, PreparedStatement ps) throws Exception {
-        ps.setString(1, c.getNome());
-        ps.setString(2, c.getDescricao());
-        ps.setString(3, c.getTipoConteudo());
-        ps.setDate(4, new java.sql.Date(c.getDataInicio().getTime()));
-        ps.setString(5, c.getStatus());
-        ps.setInt(6, c.getIdUsuario());
-        ps.setInt(7, c.getIdArea());
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, novoStatus);
+            ps.setInt(2, idCurso);
+            ps.setInt(3, idArea);
+
+            if (ps.executeUpdate() == 0) {
+                throw new CursoException("Falha ao atualizar status: curso não encontrado.");
+            }
+
+        } catch (SQLException e) {
+            throw new CursoException("Erro ao atualizar status: " + e.getMessage());
+        } catch (CursoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private Curso criarObjeto(ResultSet rs) throws Exception {
+    // ============================================================
+    // DESINSCREVER USUÁRIO (Resource espera "desinscrever")
+    // ============================================================
+    public void desinscrever(int idCurso, int idArea) throws CursoException {
+        String sql = """
+                UPDATE T_CON_CURSOS
+                SET ID_USUARIO = NULL,
+                    STS_CURSO = 'N',
+                    DT_INICIO = NULL
+                WHERE ID_CURSO = ?
+                AND ID_AREA = ?
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idCurso);
+            ps.setInt(2, idArea);
+
+            if (ps.executeUpdate() == 0) {
+                throw new CursoException("Falha ao desinscrever: curso não encontrado.");
+            }
+
+        } catch (SQLException | CursoException e) {
+            throw new CursoException("Erro ao desinscrever usuário: " + e.getMessage());
+        }
+    }
+
+    // ============================================================
+    // MAPEAR RESULTSET → OBJETO
+    // ============================================================
+    private Curso parseCurso(ResultSet rs) throws SQLException {
         Curso c = new Curso();
-
-        c.setIdCurso(rs.getInt("id_curso"));
-        c.setNome(rs.getString("nm_curso"));
-        c.setDescricao(rs.getString("ds_curso"));
-        c.setTipoConteudo(rs.getString("tp_conteudo"));
-        c.setDataInicio(rs.getDate("dt_inicio"));
-        c.setStatus(rs.getString("sts_curso"));
-        c.setIdUsuario(rs.getInt("id_usuario"));
-        c.setIdArea(rs.getInt("id_area"));
-
+        c.setIdCurso(rs.getInt("ID_CURSO"));
+        c.setNomeCurso(rs.getString("NM_CURSO"));
+        c.setDescricaoCurso(rs.getString("DS_CURSO"));
+        c.setTipoConteudo(rs.getString("TP_CONTEUDO"));
+        c.setDataInicio(rs.getDate("DT_INICIO"));
+        c.setStatusCurso(rs.getString("STS_CURSO"));
+        c.setIdUsuario(rs.getInt("ID_USUARIO"));
+        c.setIdArea(rs.getInt("ID_AREA"));
         return c;
     }
 }

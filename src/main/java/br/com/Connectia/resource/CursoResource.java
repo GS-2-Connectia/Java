@@ -1,11 +1,17 @@
 package br.com.Connectia.resource;
 
-import br.com.Connectia.bo.CursoBo;
+import br.com.Connectia.dao.CursoDao;
+import br.com.Connectia.dto.cursos.*;
+import br.com.Connectia.exception.CursoException;
 import br.com.Connectia.model.Curso;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
+import org.modelmapper.ModelMapper;
+
+import java.net.URI;
+import java.sql.SQLException;
 import java.util.List;
 
 @Path("/cursos")
@@ -14,77 +20,89 @@ import java.util.List;
 public class CursoResource {
 
     @Inject
-    CursoBo bo;
+    CursoDao cursoDao;
 
-    // ================================
-    // LISTAR TODOS
-    // ================================
+    @Inject
+    ModelMapper modelMapper;
+
+    // ============================================================
+    // LISTAR TODOS os cursos disponíveis na plataforma
+    // ============================================================
     @GET
-    @Path("/cursos")
-    public Response listar() {
-        try {
-            List<Curso> lista = bo.listar();
-            return Response.ok(lista).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public List<DetalhesCursoDto> listar() throws SQLException, CursoException {
+        return cursoDao.listar()
+                .stream()
+                .map(c -> modelMapper.map(c, DetalhesCursoDto.class))
+                .toList();
     }
 
-    // ================================
-    // BUSCAR POR ID
-    // ================================
+    // ============================================================
+    // BUSCAR curso por ID
+    // ============================================================
     @GET
-    @Path("/{id}")
-    public Response buscarPorId(@PathParam("id") int id) {
-        try {
-            Curso c = bo.buscarPorId(id);
-            return Response.ok(c).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+    @Path("/{idCurso}")
+    public Response buscar(@PathParam("idCurso") int idCurso) throws SQLException, CursoException {
+        Curso curso = cursoDao.buscar(idCurso);
+
+        if (curso == null)
+            throw new NotFoundException("Curso não encontrado");
+
+        DetalhesCursoDto dto = modelMapper.map(curso, DetalhesCursoDto.class);
+        return Response.ok(dto).build();
     }
 
-    // ================================
-    // CADASTRAR
-    // ================================
+    // ============================================================
+    // LISTAR cursos do usuário (inscrições)
+    // ============================================================
+    @GET
+    @Path("/usuario/{idUsuario}")
+    public List<CursosDoUsuarioDto> listarCursosUsuario(@PathParam("idUsuario") int idUsuario) throws SQLException, CursoException {
+        return cursoDao.listarCursosDoUsuario(idUsuario)
+                .stream()
+                .map(c -> modelMapper.map(c, CursosDoUsuarioDto.class))
+                .toList();
+    }
+
+    // ============================================================
+    // INSCREVER usuário em um curso
+    // ============================================================
     @POST
-    public Response salvar(Curso c) {
-        try {
-            bo.salvar(c);
-            return Response.status(Response.Status.CREATED).entity("Curso cadastrado com sucesso!").build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+    @Path("/{idCurso}/inscricao")
+    public Response inscrever(@PathParam("idCurso") int idCurso,
+                              @Valid InscricaoCursoDto dto,
+                              @Context UriInfo uriInfo)
+            throws SQLException, CursoException {
+
+        cursoDao.inscrever(idCurso, dto.getIdUsuario(), dto.getIdArea());
+
+        URI uri = uriInfo.getAbsolutePathBuilder().build();
+        return Response.created(uri).build();
     }
 
-    // ================================
-    // ATUALIZAR
-    // ================================
+    // ============================================================
+    // ATUALIZAR status do curso (N/E/C)
+    // ============================================================
     @PUT
-    @Path("/{id}")
-    public Response atualizar(@PathParam("id") int id, Curso c) {
-        try {
-            c.setIdCurso(id);
-            bo.atualizar(c);
-            return Response.ok("Curso atualizado com sucesso!").build();
+    @Path("/{idCurso}/status")
+    public Response atualizarStatus(@PathParam("idCurso") int idCurso,
+                                    @Valid AtualizarStatusCursoDto dto)
+            throws SQLException, CursoException {
 
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        cursoDao.atualizarStatus(idCurso, dto.getIdArea(), dto.getNovoStatus());
+        return Response.ok().build();
     }
 
-    // ================================
-    // EXCLUIR
-    // ================================
+    // ============================================================
+    // DESINSCREVER usuário de um curso
+    // ============================================================
     @DELETE
-    @Path("/{id}")
-    public Response excluir(@PathParam("id") int id) {
-        try {
-            bo.excluir(id);
-            return Response.ok("Curso excluído com sucesso!").build();
+    @Path("/{idCurso}/inscricao")
+    public Response desinscrever(@PathParam("idCurso") int idCurso,
+                                 @Valid DesinscricaoCursoDto dto)
+            throws SQLException, CursoException {
 
-        } catch (Exception e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+        cursoDao.desinscrever(idCurso, dto.getIdArea());
+        return Response.noContent().build();
     }
+
 }

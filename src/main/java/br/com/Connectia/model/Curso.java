@@ -42,7 +42,7 @@ public class Curso {
         return nome;
     }
 
-    public void setNome(String nome) {
+    public void setNomeCurso(String nome) {
         this.nome = nome;
     }
 
@@ -50,7 +50,7 @@ public class Curso {
         return descricao;
     }
 
-    public void setDescricao(String descricao) {
+    public void setDescricaoCurso(String descricao) {
         this.descricao = descricao;
     }
 
@@ -74,7 +74,7 @@ public class Curso {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatusCurso(String status) {
         this.status = status;
     }
 
