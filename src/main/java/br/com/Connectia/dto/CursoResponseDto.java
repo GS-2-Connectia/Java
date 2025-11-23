@@ -1,6 +1,5 @@
 package br.com.Connectia.dto;
 
-import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 public class CursoResponseDto {
@@ -12,8 +11,10 @@ public class CursoResponseDto {
     private LocalDate dataInicio;
     private String status;
 
-    private String nomeCarreira;
-    private String nomeArea;
+    private int idUsuario;
+    private int idArea;
+
+    private String nomeArea; // se você estiver retornando via JOIN
 
     // Getters e Setters
 
@@ -35,10 +36,12 @@ public class CursoResponseDto {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getNomeCarreira() { return nomeCarreira; }
-    public void setNomeCarreira(String nomeCarreira) { this.nomeCarreira = nomeCarreira; }
+    public int getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
+
+    public int getIdArea() { return idArea; }
+    public void setIdArea(int idArea) { this.idArea = idArea; }
 
     public String getNomeArea() { return nomeArea; }
     public void setNomeArea(String nomeArea) { this.nomeArea = nomeArea; }
 }
-

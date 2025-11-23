@@ -125,6 +125,67 @@ public class CursoDao {
         }
     }
 
+
+    // ----------------------------------------------------------------------------------
+    //  INSCRIÇÃO DO USUÁRIO NO CURSO  (agora está correto)
+    // ----------------------------------------------------------------------------------
+
+    public boolean inscreverUsuarioNoCurso(int idUsuario, int idCurso) throws Exception {
+        String sql = """
+            UPDATE T_CON_CURSO_USUARIO 
+            SET ST_ATIVO = 'A', DT_INSCRICAO = SYSDATE
+            WHERE ID_USUARIO = ? AND ID_CURSO = ?
+            """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idCurso);
+
+            int linhas = ps.executeUpdate();
+
+            if (linhas == 0) {
+                sql = """
+                        INSERT INTO T_CON_CURSO_USUARIO 
+                        (ID_USUARIO, ID_CURSO, ST_ATIVO, DT_INSCRICAO)
+                        VALUES (?, ?, 'A', SYSDATE)
+                      """;
+
+                try (PreparedStatement insert = conn.prepareStatement(sql)) {
+                    insert.setInt(1, idUsuario);
+                    insert.setInt(2, idCurso);
+                    return insert.executeUpdate() > 0;
+                }
+            }
+
+            return true;
+        }
+    }
+
+
+    // ----------------------------------------------------------------------------------
+    //  CANCELAR INSCRIÇÃO
+    // ----------------------------------------------------------------------------------
+
+    public boolean cancelarInscricaoNoCurso(int idUsuario, int idCurso) throws Exception {
+        String sql = """
+                UPDATE T_CON_CURSO_USUARIO 
+                SET ST_ATIVO = 'I'
+                WHERE ID_USUARIO = ? AND ID_CURSO = ?
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idCurso);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+
     // ================================
     // AUXILIARES
     // ================================

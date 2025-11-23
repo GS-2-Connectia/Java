@@ -36,6 +36,12 @@ public class CursoBo {
         if (c.getStatus() == null || c.getStatus().isBlank()) {
             throw new Exception("O status é obrigatório.");
         }
+        if (c.getIdUsuario() <= 0) {
+            throw new Exception("O ID do usuário é obrigatório.");
+        }
+        if (c.getIdArea() <= 0) {
+            throw new Exception("O ID da área é obrigatório.");
+        }
 
         dao.salvar(c);
     }
@@ -75,6 +81,24 @@ public class CursoBo {
 
         if (c.getNome() == null || c.getNome().isBlank()) {
             throw new Exception("O nome do curso é obrigatório.");
+        }
+        if (c.getDescricao() == null || c.getDescricao().isBlank()) {
+            throw new Exception("A descrição é obrigatória.");
+        }
+        if (c.getTipoConteudo() == null || c.getTipoConteudo().isBlank()) {
+            throw new Exception("O tipo de conteúdo é obrigatório.");
+        }
+        if (c.getDataInicio() == null) {
+            throw new Exception("A data de início é obrigatória.");
+        }
+        if (c.getStatus() == null || c.getStatus().isBlank()) {
+            throw new Exception("O status é obrigatório.");
+        }
+        if (c.getIdUsuario() <= 0) {
+            throw new Exception("O ID do usuário é obrigatório.");
+        }
+        if (c.getIdArea() <= 0) {
+            throw new Exception("O ID da área é obrigatório.");
         }
 
         dao.atualizar(c);
