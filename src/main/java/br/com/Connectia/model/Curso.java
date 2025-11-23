@@ -3,28 +3,31 @@ package br.com.Connectia.model;
 import java.util.Date;
 
 public class Curso {
+
     private int idCurso;
-    private int idCarreira;
-    private int idArea;
     private String nome;
     private String descricao;
     private String tipoConteudo;
     private Date dataInicio;
     private String status;
+    private int idUsuario;
+    private int idArea;
 
-    public void Curso() {
+    // Construtor vazio (correto)
+    public Curso() {
     }
 
-    public void Curso(int idCurso, int idCarreira, int idArea, String nome, String descricao,
-                      String tipoConteudo, Date dataInicio, String status) {
+    // Construtor completo
+    public Curso(int idCurso, String nome, String descricao, String tipoConteudo,
+                 Date dataInicio, String status, int idUsuario, int idArea) {
         this.idCurso = idCurso;
-        this.idCarreira = idCarreira;
-        this.idArea = idArea;
         this.nome = nome;
         this.descricao = descricao;
         this.tipoConteudo = tipoConteudo;
         this.dataInicio = dataInicio;
         this.status = status;
+        this.idUsuario = idUsuario;
+        this.idArea = idArea;
     }
 
     public int getIdCurso() {
@@ -33,22 +36,6 @@ public class Curso {
 
     public void setIdCurso(int idCurso) {
         this.idCurso = idCurso;
-    }
-
-    public int getIdCarreira() {
-        return idCarreira;
-    }
-
-    public void setIdCarreira(int idCarreira) {
-        this.idCarreira = idCarreira;
-    }
-
-    public int getIdArea() {
-        return idArea;
-    }
-
-    public void setIdArea(int idArea) {
-        this.idArea = idArea;
     }
 
     public String getNome() {
@@ -90,6 +77,20 @@ public class Curso {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public int getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public int getIdArea() {
+        return idArea;
+    }
+
+    public void setIdArea(int idArea) {
+        this.idArea = idArea;
+    }
 }
-
-
