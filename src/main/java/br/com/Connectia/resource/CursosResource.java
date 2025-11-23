@@ -1,7 +1,7 @@
-package Connectia.resource;
+package br.com.Connectia.resource;
 
-import Connectia.bo.CursosBo;
-import Connectia.model.Cursos;
+import br.com.Connectia.bo.CursosBo;
+import br.com.Connectia.model.Cursos;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

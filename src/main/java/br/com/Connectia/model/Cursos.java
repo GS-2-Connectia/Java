@@ -1,4 +1,4 @@
-package Connectia.model;
+package br.com.Connectia.model;
 
 import java.util.Date;
 

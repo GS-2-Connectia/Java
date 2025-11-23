@@ -1,6 +1,6 @@
-package Connectia.dao;
+package br.com.Connectia.dao;
 
-import Connectia.model.Usuario;
+import br.com.Connectia.model.Usuario;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

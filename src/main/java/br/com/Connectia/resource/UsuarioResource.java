@@ -1,7 +1,7 @@
-package Connectia.resource;
+package br.com.Connectia.resource;
 
-import Connectia.bo.UsuarioBo;
-import Connectia.model.Usuario;
+import br.com.Connectia.bo.UsuarioBo;
+import br.com.Connectia.model.Usuario;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;

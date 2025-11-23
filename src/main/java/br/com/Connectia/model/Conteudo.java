@@ -1,4 +1,4 @@
-package Connectia.model;
+package br.com.Connectia.model;
 
 public class Conteudo {
     private int idConteudo;
