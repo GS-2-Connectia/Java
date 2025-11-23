@@ -22,8 +22,8 @@ public class CursoDao {
         List<Curso> lista = new ArrayList<>();
 
         String sql = """
-                SELECT id_curso, id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status
-                FROM cursos
+                SELECT nm_curso, id_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area
+                FROM T_CON_CURSOS
                 """;
 
         try (Connection conn = dataSource.getConnection();
@@ -43,8 +43,8 @@ public class CursoDao {
     // ================================
     public Curso buscarPorId(int id) throws Exception {
         String sql = """
-                SELECT id_curso, id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status
-                FROM cursos WHERE id_curso = ?
+                SELECT nm_curso, id_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area
+                FROM T_CON_CURSOS WHERE id_curso = ?
                 """;
 
         try (Connection conn = dataSource.getConnection();
@@ -67,8 +67,8 @@ public class CursoDao {
     // ================================
     public void salvar(Curso c) throws Exception {
         String sql = """
-                INSERT INTO cursos (id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO T_CON_CURSOS (nm_curso, id_curso, ds_curso, tp_conteudo, dt_inicio, sts_curso, id_usuario, id_area)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection conn = dataSource.getConnection();
@@ -90,8 +90,8 @@ public class CursoDao {
     // ================================
     public void atualizar(Curso c) throws Exception {
         String sql = """
-                UPDATE cursos SET
-                    id_carreira = ?, id_area = ?, nome = ?, descricao = ?, tipo_conteudo = ?, data_inicio = ?, status = ?
+                UPDATE T_CON_CURSOS SET
+                    nm_curso = ?, id_curso = ?, ds_curso = ?, tp_conteudo = ?, dt_inicio ?, sts_curso = ?, id_usuario = ?, id_area = ?
                 WHERE id_curso = ?
                 """;
 
@@ -108,7 +108,7 @@ public class CursoDao {
     // EXCLUIR
     // ================================
     public boolean excluir(int id) throws Exception {
-        String sql = "DELETE FROM cursos WHERE id_curso = ?";
+        String sql = "DELETE FROM T_CON_CURSOS WHERE id_curso = ?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -181,14 +181,14 @@ public class CursoDao {
     private Curso criarObjeto(ResultSet rs) throws Exception {
         Curso c = new Curso();
 
-        c.setIdCurso(rs.getInt("id_curso"));
-        c.setIdCarreira(rs.getInt("id_carreira"));
-        c.setIdArea(rs.getInt("id_area"));
-        c.setNome(rs.getString("nome"));
-        c.setDescricao(rs.getString("descricao"));
-        c.setTipoConteudo(rs.getString("tipo_conteudo"));
-        c.setDataInicio(rs.getDate("data_inicio"));
-        c.setStatus(rs.getString("status"));
+        c.setIdCurso(rs.getInt("nm_curso"));
+        c.setIdCarreira(rs.getInt("id_curso"));
+        c.setIdArea(rs.getInt("ds_curso"));
+        c.setNome(rs.getString("tp_conteudo"));
+        c.setDescricao(rs.getString("dt_inicio"));
+        c.setTipoConteudo(rs.getString("sts_curso"));
+        c.setDataInicio(rs.getDate("id_usuario"));
+        c.setStatus(rs.getString("id_area"));
 
         return c;
     }
