@@ -1,6 +1,6 @@
 package br.com.Connectia.dao;
 
-import br.com.Connectia.model.Cursos;
+import br.com.Connectia.model.Curso;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
-public class CursosDao {
+public class CursoDao {
 
     @Inject
     DataSource dataSource;
@@ -18,8 +18,8 @@ public class CursosDao {
     // ================================
     // LISTAR
     // ================================
-    public List<Cursos> listar() throws Exception {
-        List<Cursos> lista = new ArrayList<>();
+    public List<Curso> listar() throws Exception {
+        List<Curso> lista = new ArrayList<>();
 
         String sql = """
                 SELECT id_curso, id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status
@@ -41,7 +41,7 @@ public class CursosDao {
     // ================================
     // BUSCAR POR ID
     // ================================
-    public Cursos buscarPorId(int id) throws Exception {
+    public Curso buscarPorId(int id) throws Exception {
         String sql = """
                 SELECT id_curso, id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status
                 FROM cursos WHERE id_curso = ?
@@ -65,7 +65,7 @@ public class CursosDao {
     // ================================
     // SALVAR
     // ================================
-    public void salvar(Cursos c) throws Exception {
+    public void salvar(Curso c) throws Exception {
         String sql = """
                 INSERT INTO cursos (id_carreira, id_area, nome, descricao, tipo_conteudo, data_inicio, status)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -88,7 +88,7 @@ public class CursosDao {
     // ================================
     // ATUALIZAR
     // ================================
-    public void atualizar(Cursos c) throws Exception {
+    public void atualizar(Curso c) throws Exception {
         String sql = """
                 UPDATE cursos SET
                     id_carreira = ?, id_area = ?, nome = ?, descricao = ?, tipo_conteudo = ?, data_inicio = ?, status = ?
@@ -119,9 +119,56 @@ public class CursosDao {
     }
 
     // ================================
+    // INSCRIÇÃO/CANCELAMENTO DE USUÁRIO
+    // ================================
+
+    // Inscrever usuário na área (ativa ou insere)
+    public boolean inscreverUsuarioNaArea(int idUsuario, int idArea) throws Exception {
+        String sql = "UPDATE T_CON_AREA_USU SET ST_ATIVO = 'A', DT_INICIO = SYSDATE " +
+                "WHERE ID_USUARIO = ? AND ID_AREA = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idArea);
+
+            int linhasAfetadas = ps.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                // Inserir se não existir
+                sql = "INSERT INTO T_CON_AREA_USU (ID_USUARIO, ID_AREA, ST_ATIVO, DT_INICIO) " +
+                        "VALUES (?, ?, 'A', SYSDATE)";
+                try (PreparedStatement psInsert = conn.prepareStatement(sql)) {
+                    psInsert.setInt(1, idUsuario);
+                    psInsert.setInt(2, idArea);
+                    return psInsert.executeUpdate() > 0;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // Cancelar inscrição do usuário na área
+    public boolean cancelarInscricaoNaArea(int idUsuario, int idArea) throws Exception {
+        String sql = "UPDATE T_CON_AREA_USU SET ST_ATIVO = 'I' " +
+                "WHERE ID_USUARIO = ? AND ID_AREA = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idArea);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // ================================
     // MÉTODOS AUXILIARES
     // ================================
-    private void setarParametros(Cursos c, PreparedStatement ps) throws Exception {
+    private void setarParametros(Curso c, PreparedStatement ps) throws Exception {
         ps.setInt(1, c.getIdCarreira());
         ps.setInt(2, c.getIdArea());
         ps.setString(3, c.getNome());
@@ -131,8 +178,8 @@ public class CursosDao {
         ps.setString(7, c.getStatus());
     }
 
-    private Cursos criarObjeto(ResultSet rs) throws Exception {
-        Cursos c = new Cursos();
+    private Curso criarObjeto(ResultSet rs) throws Exception {
+        Curso c = new Curso();
 
         c.setIdCurso(rs.getInt("id_curso"));
         c.setIdCarreira(rs.getInt("id_carreira"));

@@ -1,6 +1,5 @@
 package br.com.Connectia.resource;
 
-import br.com.Connectia.bo.UsuarioBo;
 import br.com.Connectia.model.Usuario;
 
 import jakarta.inject.Inject;

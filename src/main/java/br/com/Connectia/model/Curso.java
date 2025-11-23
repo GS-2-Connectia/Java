@@ -2,7 +2,7 @@ package br.com.Connectia.model;
 
 import java.util.Date;
 
-public class Cursos {
+public class Curso {
     private int idCurso;
     private int idCarreira;
     private int idArea;

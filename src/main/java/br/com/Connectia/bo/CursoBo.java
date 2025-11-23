@@ -1,22 +1,22 @@
 package br.com.Connectia.bo;
 
-import br.com.Connectia.dao.CursosDao;
-import br.com.Connectia.model.Cursos;
+import br.com.Connectia.dao.CursoDao;
+import br.com.Connectia.model.Curso;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.List;
 
 @ApplicationScoped
-public class CursosBo {
+public class CursoBo {
 
     @Inject
-    CursosDao dao;
+    CursoDao dao;
 
     // ================================
     // SALVAR
     // ================================
-    public void salvar(Cursos c) throws Exception {
+    public void salvar(Curso c) throws Exception {
 
         if (c == null) {
             throw new Exception("Dados do curso não enviados.");
@@ -43,15 +43,15 @@ public class CursosBo {
     // ================================
     // LISTAR
     // ================================
-    public List<Cursos> listar() throws Exception {
+    public List<Curso> listar() throws Exception {
         return dao.listar();
     }
 
     // ================================
     // BUSCAR POR ID
     // ================================
-    public Cursos buscarPorId(int id) throws Exception {
-        Cursos c = dao.buscarPorId(id);
+    public Curso buscarPorId(int id) throws Exception {
+        Curso c = dao.buscarPorId(id);
 
         if (c == null) {
             throw new Exception("Curso não encontrado.");
@@ -63,7 +63,7 @@ public class CursosBo {
     // ================================
     // ATUALIZAR
     // ================================
-    public void atualizar(Cursos c) throws Exception {
+    public void atualizar(Curso c) throws Exception {
 
         if (c == null || c.getIdCurso() <= 0) {
             throw new Exception("Curso inválido para atualização.");
@@ -84,7 +84,7 @@ public class CursosBo {
     // EXCLUIR
     // ================================
     public void excluir(int id) throws Exception {
-        Cursos c = dao.buscarPorId(id);
+        Curso c = dao.buscarPorId(id);
 
         if (c == null) {
             throw new Exception("Curso não encontrado.");

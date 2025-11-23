@@ -1,7 +1,7 @@
 package br.com.Connectia.resource;
 
-import br.com.Connectia.bo.CursosBo;
-import br.com.Connectia.model.Cursos;
+import br.com.Connectia.bo.CursoBo;
+import br.com.Connectia.model.Curso;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,10 +11,10 @@ import java.util.List;
 @Path("/cursos")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CursosResource {
+public class CursoResource {
 
     @Inject
-    CursosBo bo;
+    CursoBo bo;
 
     // ================================
     // LISTAR TODOS
@@ -22,7 +22,7 @@ public class CursosResource {
     @GET
     public Response listar() {
         try {
-            List<Cursos> lista = bo.listar();
+            List<Curso> lista = bo.listar();
             return Response.ok(lista).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -36,7 +36,7 @@ public class CursosResource {
     @Path("/{id}")
     public Response buscarPorId(@PathParam("id") int id) {
         try {
-            Cursos c = bo.buscarPorId(id);
+            Curso c = bo.buscarPorId(id);
             return Response.ok(c).build();
         } catch (Exception e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -47,7 +47,7 @@ public class CursosResource {
     // CADASTRAR
     // ================================
     @POST
-    public Response salvar(Cursos c) {
+    public Response salvar(Curso c) {
         try {
             bo.salvar(c);
             return Response.status(Response.Status.CREATED).entity("Curso cadastrado com sucesso!").build();
@@ -61,7 +61,7 @@ public class CursosResource {
     // ================================
     @PUT
     @Path("/{id}")
-    public Response atualizar(@PathParam("id") int id, Cursos c) {
+    public Response atualizar(@PathParam("id") int id, Curso c) {
         try {
             c.setIdCurso(id);
             bo.atualizar(c);
